@@ -1,7 +1,14 @@
 <template>
-  <div></div>
+  <main class="home">
+    <h1>Home</h1>
+    <p>Welcome to the Bookstore</p>
+  </main>
 </template>
 
 <script setup></script>
 
-<style scoped></style>
+<style scoped>
+.home {
+  padding: 1.5rem;
+}
+</style>
