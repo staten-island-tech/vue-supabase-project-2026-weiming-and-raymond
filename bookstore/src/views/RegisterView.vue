@@ -4,17 +4,19 @@ import { useAuthStore } from '../stores/authStore'
 
 const auth = useAuthStore()
 
+const username = ref('')
 const email = ref('')
 const password = ref('')
 
-const login = async () => {
+const register = async () => {
   try {
-    await auth.login(
+    await auth.register(
+      username.value,
       email.value,
       password.value
     )
 
-    alert('Login successful')
+    alert('Registration successful')
   } catch (error) {
     alert(error.message)
   }
@@ -23,7 +25,12 @@ const login = async () => {
 
 <template>
   <div>
-    <h2>Login</h2>
+    <h2>Register</h2>
+
+    <input
+      v-model="username"
+      placeholder="Username"
+    />
 
     <input
       v-model="email"
@@ -36,8 +43,8 @@ const login = async () => {
       placeholder="Password"
     />
 
-    <button @click="login">
-      Login
+    <button @click="register">
+      Register
     </button>
   </div>
 </template>

@@ -1,50 +1,47 @@
 import { defineStore } from 'pinia'
 import { supabase } from '../lib/supabase'
 
-export const useStore = defineStore('auth', {
- state: () => ({
-   user: null
- }),
+export const useAuthStore = defineStore('auth', {
 
- actions: {
+  actions: {
 
-   async signUp(email, password) {
-     const { data, error } = await supabase.auth.signUp({
-       email,
-       password
-     })
+    async register(username, email, password) {
 
-     if (error) {
-       alert(error.message)
-     } else {
-       this.user = data.user
-     }
-   },
+      const { data, error } =
+        await supabase.auth.signUp({
+          email,
+          password
+        })
 
-   async login(email, password) {
-     const { data, error } =
-       await supabase.auth.signInWithPassword({
-         email,
-         password
-       })
+      if (error) throw error
 
-     if (error) {
-       alert(error.message)
-     } else {
-       this.user = data.user
-     }
-   },
+      await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: data.user.id,
+            username
+          }
+        ])
 
-   async logout() {
-     await supabase.auth.signOut()
-     this.user = null
-   },
+      return data
+    },
 
-   async fetchUser() {
-     const { data } =
-       await supabase.auth.getUser()
+    async login(email, password) {
 
-     this.user = data.user
-   }
- }
+      const { data, error } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password
+        })
+
+      if (error) throw error
+
+      return data
+    },
+
+    async logout() {
+      await supabase.auth.signOut()
+    }
+  }
 })
