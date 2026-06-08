@@ -3,15 +3,15 @@ import { ref } from 'vue'
 import { useAuthStore } from '../stores/authStore'
 
 const auth = useAuthStore()
-
+const username = ref('')
 const email = ref('')
 const password = ref('')
 
-const login = async () => {
+const register = async () => {
   try {
-    await auth.login(email.value, password.value)
+    await auth.register(username.value, email.value, password.value)
 
-    alert('Login successful')
+    alert('Registration successful')
   } catch (error) {
     alert(error.message)
   }
@@ -19,19 +19,15 @@ const login = async () => {
 </script>
 
 <template>
-  <div class="login-view">
-    <h2>Login</h2>
+  <div>
+    <h2>Register</h2>
+
+    <input v-model="username" placeholder="Username" />
 
     <input v-model="email" placeholder="Email" />
 
     <input type="password" v-model="password" placeholder="Password" />
 
-    <button @click="login">Login</button>
+    <button @click="register">Register</button>
   </div>
 </template>
-
-<style scoped>
-.login-view {
-  padding: 1rem;
-}
-</style>
