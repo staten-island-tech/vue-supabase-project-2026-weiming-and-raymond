@@ -93,7 +93,6 @@ const filteredBooks = computed(() => {
 
 onMounted(() => search())
 </script>
-
 <style scoped>
 .they-call-it-the-store {
   padding: 16px;
