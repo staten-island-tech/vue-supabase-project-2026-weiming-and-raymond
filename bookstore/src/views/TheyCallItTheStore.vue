@@ -73,7 +73,6 @@ const filteredBooks = computed(() => {
   })
 })
 </script>
-
 <style scoped>
 .they-call-it-the-store {
   padding: 16px;
