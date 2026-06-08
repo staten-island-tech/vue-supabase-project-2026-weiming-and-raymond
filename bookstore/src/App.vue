@@ -3,87 +3,66 @@ import { RouterLink, RouterView } from 'vue-router'
 </script>
 
 <template>
-  <header>
-    <div class="wrapper">
-      <h1 class="storeheader">They Call It The Store</h1>
+  <div id="app">
+    <header class="site-header">
+      <div class="container">
+        <div class="brand">
+          <RouterLink to="/home" class="logo-link">They Call It The Store</RouterLink>
+        </div>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/store">They Call It The Store</RouterLink>
-      </nav>
-    </div>
-  </header>
+        <nav class="main-nav" aria-label="Main navigation">
+          <RouterLink to="/home">Home</RouterLink>
+          <RouterLink to="/books">Books</RouterLink>
+          <RouterLink to="/store">Store</RouterLink>
+          <RouterLink to="/login">Login</RouterLink>
+          <RouterLink to="/register">Register</RouterLink>
+        </nav>
+      </div>
+    </header>
 
-  <RouterView />
+    <main>
+      <RouterView />
+    </main>
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+:root {
+  --bg: #f6f8fa;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --accent: #2563eb;
 }
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.site-header {
+  background: linear-gradient(90deg, #0f1720 0%, #0b1220 100%);
+  color: #fff;
 }
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+.site-header .container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
 }
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
+.brand .logo-link {
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.125rem;
 }
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+.main-nav a {
+  color: rgba(255, 255, 255, 0.9);
+  margin-left: 14px;
+  text-decoration: none;
+  font-weight: 500;
 }
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+.main-nav a:hover {
+  color: var(--accent);
 }
-
-nav a:first-of-type {
-  border: 0;
-}
-
-.storeheader {
-  width: auto;
-  max-width: 1200px;
-  margin: 0.5rem auto 0;
-  text-align: center;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+main {
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 0 16px;
 }
 </style>

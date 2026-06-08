@@ -19,19 +19,64 @@ const login = async () => {
 </script>
 
 <template>
-  <div class="login-view">
-    <h2>Login</h2>
+  <section class="auth-page">
+    <div class="card">
+      <h2>Login</h2>
 
-    <input v-model="email" placeholder="Email" />
+      <label class="field">
+        <input v-model="email" placeholder="Email" />
+      </label>
 
-    <input type="password" v-model="password" placeholder="Password" />
+      <label class="field">
+        <input type="password" v-model="password" placeholder="Password" />
+      </label>
 
-    <button @click="login">Login</button>
-  </div>
+      <div class="actions">
+        <button class="btn primary" @click="login">Login</button>
+      </div>
+    </div>
+  </section>
 </template>
 
 <style scoped>
-.login-view {
-  padding: 1rem;
+.auth-page {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card, #fff);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(11, 20, 30, 0.08);
+}
+.card h2 {
+  margin: 0 0 12px;
+}
+.field {
+  display: block;
+  margin-bottom: 12px;
+}
+.field input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+.btn {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 0;
+  cursor: pointer;
+}
+.btn.primary {
+  background: var(--accent);
+  color: #fff;
 }
 </style>
