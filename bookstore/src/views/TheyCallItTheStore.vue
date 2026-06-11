@@ -53,6 +53,7 @@ function search() {
 
 onMounted(() => search())
 </script>
+
 <style scoped>
 .they-call-it-the-store {
   padding: 16px;
