@@ -6,20 +6,31 @@ const title = ref('')
 const author = ref('')
 
 const addBook = async () => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  if (!title.value.trim()) {
+    alert('Please provide a book title')
+    return
+  }
 
-  await supabase.from('books').insert({
-    title: title.value,
-    author: author.value,
-    user_id: user.id,
-  })
+  try {
+    const { data, error } = await supabase.auth.getUser()
+    const user = data?.user || null
 
-  title.value = ''
-  author.value = ''
+    const payload = {
+      title: title.value.trim(),
+      author: author.value.trim() || null,
+      user_id: user?.id || null,
+    }
 
-  alert('Book Added')
+    const { error: insertErr } = await supabase.from('books').insert(payload)
+    if (insertErr) throw insertErr
+
+    title.value = ''
+    author.value = ''
+    alert('Book added')
+  } catch (err) {
+    console.error('addBook failed', err)
+    alert('Failed to add book: ' + (err.message || err))
+  }
 }
 </script>
 

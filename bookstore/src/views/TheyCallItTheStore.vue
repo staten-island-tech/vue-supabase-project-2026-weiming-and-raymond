@@ -19,13 +19,13 @@
     <div v-if="loading" class="loading">Loading…</div>
 
     <div class="book-grid">
-      <article v-for="b in filteredBooks" :key="b.id" class="book-card">
-        <img v-if="b.cover" :src="b.cover" :alt="b.title" class="cover" />
-        <div class="meta">
-          <h3 class="title">{{ b.title }}</h3>
-          <p class="author">by {{ b.author }}</p>
-        </div>
-      </article>
+      <BookItem v-for="b in filteredBooks" :key="b.id" :book="b">
+        <template #actions>
+          <button class="btn" @click.prevent="saveToStore(b)" :disabled="saving">
+            {{ saving ? 'Saving…' : 'Save to store' }}
+          </button>
+        </template>
+      </BookItem>
     </div>
 
     <p v-if="!loading && filteredBooks.length === 0" class="empty">No books found.</p>
@@ -34,6 +34,9 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import BookItem from '../components/BookItem.vue'
+import { useBookStore } from '../stores/bookStore'
+import { useAuthStore } from '../stores/authStore'
 
 const query = ref('')
 const books = ref([])
@@ -92,6 +95,32 @@ const filteredBooks = computed(() => {
 })
 
 onMounted(() => search())
+
+const bookStore = useBookStore()
+const auth = useAuthStore()
+const saving = ref(false)
+
+async function saveToStore(item) {
+  if (!item || !item.title) return
+  saving.value = true
+  try {
+    // ensure auth state initialized
+    auth.init()
+    const payload = {
+      title: item.title,
+      author: item.author || null,
+      cover: item.cover || null,
+      user_id: auth.user?.id || null,
+    }
+    await bookStore.addBook(payload)
+    alert('Saved to store')
+  } catch (err) {
+    console.error('saveToStore error', err)
+    alert('Failed to save: ' + (err.message || err))
+  } finally {
+    saving.value = false
+  }
+}
 </script>
 
 <style scoped>
