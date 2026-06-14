@@ -7,22 +7,27 @@ export const useAuthStore = defineStore('auth', {
 
     async register(username, email, password) {
 
-      const { data, error } =
-        await supabase.auth.signUp({
-          email,
-          password
-        })
+      const { data, error } = await supabase.auth.signUp({ email, password })
 
       if (error) throw error
 
-      await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: data.user.id,
-            username
-          }
-        ])
+      // If email confirmation is enabled in Supabase, `data.user` may be null
+      // until the user confirms their email. In that case, don't attempt to
+      // insert a profile row yet — return the data so the UI can instruct the
+      // user to check their email. If a user object is present, create the
+      // profile immediately.
+      if (!data?.user) {
+        return data
+      }
+
+      const { error: insertError } = await supabase.from('profiles').insert([
+        {
+          id: data.user.id,
+          username
+        }
+      ])
+
+      if (insertError) throw insertError
 
       return data
     },

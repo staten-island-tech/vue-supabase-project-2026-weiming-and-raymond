@@ -1,7 +1,3 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-</script>
-
 <template>
   <div id="app">
     <header class="site-header">
@@ -26,13 +22,16 @@ import { RouterLink, RouterView } from 'vue-router'
   </div>
 </template>
 
-<style scoped>
+<style>
 :root {
   --bg: #f6f8fa;
   --card: #ffffff;
   --muted: #6b7280;
   --accent: #2563eb;
 }
+</style>
+
+<style scoped>
 .site-header {
   background: linear-gradient(90deg, #0f1720 0%, #0b1220 100%);
   color: #fff;
