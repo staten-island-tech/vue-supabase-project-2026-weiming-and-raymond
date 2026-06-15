@@ -1,48 +1,20 @@
 import { defineStore } from 'pinia'
-import { supabase, requireSupabase } from '../lib/supabase'
+import { login as identityLogin, signup, logout as identityLogout } from '@netlify/identity'
 
 export const useAuthStore = defineStore('auth', {
   actions: {
     async register(username, email, password) {
-      const client = requireSupabase()
-
-      const { data, error } = await client.auth.signUp({
-        email,
-        password,
-      })
-
-      if (error) throw error
-
-      const authUser = data.user
-
-      const { error: insertError } = await client.from('users').insert({
-        id: authUser?.id,
-        username,
-        email,
-        created: new Date().toISOString(),
-      })
-
-      if (insertError) throw insertError
-
-      return authUser
+      const user = await signup(email, password, { full_name: username })
+      return user
     },
 
     async login(email, password) {
-      const client = requireSupabase()
-
-      const { data, error } = await client.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) throw error
-
-      return data
+      const user = await identityLogin(email, password)
+      return user
     },
 
     async logout() {
-      const client = requireSupabase()
-      await client.auth.signOut()
+      await identityLogout()
     },
   },
 })

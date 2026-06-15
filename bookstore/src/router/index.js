@@ -4,9 +4,10 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import BooksView from '../views/BooksView.vue'
 import Store from '../views/TheyCallItTheStore.vue'
-import { supabase } from '@/lib/supabase.js'
+import { getUser } from '@netlify/identity'
 import { useToast } from '@/components/composables/useToast.js'
 import OrdersView from '@/views/OrdersView.vue'
+
 const toast = useToast()
 const history =
   typeof window !== 'undefined' && window.location.protocol === 'file:'
@@ -54,18 +55,17 @@ const router = createRouter({
     },
   ],
 })
-router.beforeEach(async (to, from, next) => {
-  let session = null
-  if (supabase) {
-    const { data } = await supabase.auth.getSession()
-    session = data.session
-  }
 
-  if (to.meta.requiresAuth && !session) {
-    toast.error('Login before checking books')
-    next('/login')
-  } else {
-    next()
+router.beforeEach(async (to, from, next) => {
+  if (to.meta.requiresAuth) {
+    const user = await getUser()
+    if (!user) {
+      toast.error('Login before checking books')
+      next('/login')
+      return
+    }
   }
+  next()
 })
+
 export default router

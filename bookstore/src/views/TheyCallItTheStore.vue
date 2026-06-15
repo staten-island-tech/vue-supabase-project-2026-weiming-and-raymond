@@ -45,7 +45,6 @@
 <script setup>
 import { useToast } from '@/components/composables/useToast.js'
 import { ref, onMounted, computed } from 'vue'
-import { supabase } from '@/lib/supabase'
 
 const query = ref('')
 const books = ref([])
