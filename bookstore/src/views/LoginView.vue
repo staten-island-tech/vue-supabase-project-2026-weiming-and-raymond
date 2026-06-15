@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
 import { useToast } from '@/components/composables/useToast'
 
@@ -8,11 +9,13 @@ const auth = useAuthStore()
 const email = ref('')
 const password = ref('')
 const toast = useToast()
+const router = useRouter()
 const login = async () => {
   try {
     await auth.login(email.value, password.value)
 
     toast.success('Login successful')
+    router.push({ name: 'store' })
   } catch (error) {
     toast.error(error.message)
   }
