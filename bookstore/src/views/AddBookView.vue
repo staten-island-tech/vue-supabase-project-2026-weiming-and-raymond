@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { getUser } from '@netlify/identity'
 import { supabase } from '../lib/supabase'
 
 const title = ref('')
@@ -12,8 +13,7 @@ const addBook = async () => {
   }
 
   try {
-    const { data, error } = await supabase.auth.getUser()
-    const user = data?.user || null
+    const user = await getUser()
 
     const payload = {
       title: title.value.trim(),

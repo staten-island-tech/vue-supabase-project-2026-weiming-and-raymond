@@ -12,9 +12,14 @@ const password = ref('')
 
 const register = async () => {
   try {
-    await auth.register(username.value, email.value, password.value)
-    toast.success('Registration successful — check your email to confirm')
-    router.push({ name: 'login' })
+    const user = await auth.register(username.value, email.value, password.value)
+    if (user && user.emailVerified) {
+      toast.success('Account created — you are now logged in')
+      router.push({ name: 'store' })
+    } else {
+      toast.success('Registration successful — check your email to confirm your account')
+      router.push({ name: 'login' })
+    }
   } catch (error) {
     toast.error(error.message)
   }
