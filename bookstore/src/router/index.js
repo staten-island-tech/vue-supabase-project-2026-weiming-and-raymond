@@ -48,7 +48,7 @@ router.beforeEach(async (to, from, next) => {
     data: { session },
   } = await supabase.auth.getSession()
 
-  if (to.meta.requiresAuth && session) {
+  if (to.meta.requiresAuth && !session) {
     toast.error("Login before checking books");
     next('/login')
   } else {
