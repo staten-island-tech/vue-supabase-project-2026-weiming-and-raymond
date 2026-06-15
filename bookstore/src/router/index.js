@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
@@ -7,8 +7,13 @@ import { supabase } from '@/lib/supabase.js'
 import { useToast } from '@/components/composables/useToast.js'
 import OrdersView from '@/views/OrdersView.vue'
 const toast = useToast()
+const history =
+  typeof window !== 'undefined' && window.location.protocol === 'file:'
+    ? createWebHashHistory(import.meta.env.BASE_URL)
+    : createWebHistory(import.meta.env.BASE_URL)
+
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history,
   routes: [
     {
       path: '/',
