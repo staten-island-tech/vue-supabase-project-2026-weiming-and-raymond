@@ -2,29 +2,8 @@ import { defineStore } from 'pinia'
 import { supabase } from '../lib/supabase'
 
 export const useAuthStore = defineStore('auth', {
-
   actions: {
-
     async register(username, email, password) {
-
-<<<<<<< HEAD
-      const { data, error } =
-        await supabase.auth.signUp({
-          email,
-          password
-        })
-
-      if (error) throw error
-
-      await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: data.user.id,
-            username
-          }
-        ])
-=======
       const { data, error } = await supabase.auth.signUp({ email, password })
 
       if (error) throw error
@@ -41,23 +20,20 @@ export const useAuthStore = defineStore('auth', {
       const { error: insertError } = await supabase.from('profiles').insert([
         {
           id: data.user.id,
-          username
-        }
+          username,
+        },
       ])
 
       if (insertError) throw insertError
->>>>>>> parent of 6c3d1f8 (c)
 
       return data
     },
 
     async login(email, password) {
-
-      const { data, error } =
-        await supabase.auth.signInWithPassword({
-          email,
-          password
-        })
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
       if (error) throw error
 
@@ -66,6 +42,6 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
       await supabase.auth.signOut()
-    }
-  }
+    },
+  },
 })
