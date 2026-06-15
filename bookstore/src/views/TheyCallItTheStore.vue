@@ -21,8 +21,6 @@
       <strong>Cart:</strong>
 
       <span v-for="item in cart" :key="item.id"> {{ item.title }} ({{ item.quantity }}) </span>
-
-      <button class="checkout-btn" @click="checkout">Checkout</button>
     </div>
     <div class="book-grid">
       <article v-for="b in filteredBooks" :key="b.id" class="book-card">
@@ -76,46 +74,6 @@ function buyBook(book) {
   }
 
   toast.success(`Added "${book.title}" to cart`)
-}
-async function checkout() {
-  try {
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      toast.error('You must be logged in')
-      return
-    }
-
-    const { data: dbUser, error: userError } = await supabase
-      .from('users')
-      .select('user_id')
-      .eq('email', user.email)
-      .single()
-
-    if (userError || !dbUser) {
-      toast.error('User record not found')
-      return
-    }
-
-    const total = cart.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
-
-    const { error: orderError } = await supabase.from('orders').insert({
-      buyer_id: dbUser.user_id,
-      price: total,
-      created_at: new Date().toISOString(),
-    })
-
-    if (orderError) throw orderError
-
-    toast.success(`Order placed!\nItems: ${cart.value.length}\nTotal: $${total.toFixed(2)}`)
-
-    cart.value = []
-  } catch (err) {
-    toast.error('Failed to place order')
-  }
 }
 
 const CACHE_DURATION = 1000 * 60 * 60
@@ -300,14 +258,5 @@ onMounted(() => search())
   margin-bottom: 16px;
   background: #f8fafc;
   border-radius: 10px;
-}
-
-.checkout-btn {
-  background: #2563eb;
-  color: white;
-  border: 0;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
 }
 </style>
