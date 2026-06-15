@@ -4,9 +4,9 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import Store from '../views/TheyCallItTheStore.vue'
 import { supabase } from '@/lib/supabase.js'
-import { useToast } from '@/composables/useToast.js'
+import { useToast } from '@/components/composables/useToast.js'
 import OrdersView from '@/views/OrdersView.vue'
-const toast = useToast();
+const toast = useToast()
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -33,7 +33,7 @@ const router = createRouter({
       path: '/orders',
       name: 'orders',
       component: OrdersView,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
       path: '/store',
@@ -49,7 +49,7 @@ router.beforeEach(async (to, from, next) => {
   } = await supabase.auth.getSession()
 
   if (to.meta.requiresAuth && !session) {
-    toast.error("Login before checking books");
+    toast.error('Login before checking books')
     next('/login')
   } else {
     next()

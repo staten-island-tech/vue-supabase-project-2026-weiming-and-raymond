@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useAuthStore } from '../stores/authStore'
-import { useToast } from '@/composables/useToast'
+import { useToast } from '@/components/composables/useToast'
 const toast = useToast()
 const auth = useAuthStore()
 const username = ref('')
@@ -58,7 +58,9 @@ const register = async () => {
   border-radius: 14px;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
   border: 1px solid rgba(226, 232, 240, 0.8);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .card:hover {
@@ -81,7 +83,7 @@ const register = async () => {
 
 .field input {
   width: 100%;
- box-sizing: border-box;
+  box-sizing: border-box;
   padding: 12px;
   border-radius: 10px;
   border: 1px solid #e2e8f0;

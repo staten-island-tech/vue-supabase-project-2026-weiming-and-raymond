@@ -20,13 +20,9 @@
     <div class="cart-summary" v-if="cart.length">
       <strong>Cart:</strong>
 
-      <span v-for="item in cart" :key="item.id">
-        {{ item.title }} ({{ item.quantity }})
-      </span>
+      <span v-for="item in cart" :key="item.id"> {{ item.title }} ({{ item.quantity }}) </span>
 
-      <button class="checkout-btn" @click="checkout">
-        Checkout
-      </button>
+      <button class="checkout-btn" @click="checkout">Checkout</button>
     </div>
     <div class="book-grid">
       <article v-for="b in filteredBooks" :key="b.id" class="book-card">
@@ -38,12 +34,7 @@
           <div class="actions">
             <span class="price">${{ (b.price || 19.99).toFixed(2) }}</span>
 
-            <button
-              class="buy-btn"
-              @click="buyBook(b)"
-            >
-              Buy Now
-            </button>
+            <button class="buy-btn" @click="buyBook(b)">Buy Now</button>
           </div>
         </div>
       </article>
@@ -54,7 +45,7 @@
 </template>
 
 <script setup>
-import { useToast } from '@/composables/useToast'
+import { useToast } from '@/components/composables/useToast.js'
 import { ref, onMounted, computed } from 'vue'
 import { supabase } from '@/lib/supabase'
 
@@ -62,7 +53,7 @@ const query = ref('')
 const books = ref([])
 const loading = ref(false)
 const cart = ref([])
-const toast = useToast();
+const toast = useToast()
 const categories = ref(['All', 'Fiction', 'Nonfiction', 'Science', 'History', 'Mystery'])
 const category = ref('All')
 
@@ -70,7 +61,6 @@ function selectCategory(c) {
   category.value = c
   if (c === 'All') search()
 }
-
 
 function buyBook(book) {
   const existing = cart.value.find((b) => b.id === book.id)
@@ -110,24 +100,17 @@ async function checkout() {
       return
     }
 
-    const total = cart.value.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    )
+    const total = cart.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
-    const { error: orderError } = await supabase
-      .from('orders')
-      .insert({
-        buyer_id: dbUser.user_id,
-        price: total,
-        created_at: new Date().toISOString(),
-      })
+    const { error: orderError } = await supabase.from('orders').insert({
+      buyer_id: dbUser.user_id,
+      price: total,
+      created_at: new Date().toISOString(),
+    })
 
     if (orderError) throw orderError
 
-    toast.success(
-      `Order placed!\nItems: ${cart.value.length}\nTotal: $${total.toFixed(2)}`
-    )
+    toast.success(`Order placed!\nItems: ${cart.value.length}\nTotal: $${total.toFixed(2)}`)
 
     cart.value = []
   } catch (err) {
@@ -135,12 +118,10 @@ async function checkout() {
   }
 }
 
-const CACHE_DURATION = 1000 * 60 * 60 
+const CACHE_DURATION = 1000 * 60 * 60
 
 async function search() {
-  const rawQuery =
-    query.value.trim() ||
-    (category.value === 'All' ? 'fiction' : category.value)
+  const rawQuery = query.value.trim() || (category.value === 'All' ? 'fiction' : category.value)
 
   const cacheKey = `books:${rawQuery}`
 
@@ -159,7 +140,7 @@ async function search() {
 
   try {
     const res = await fetch(
-      `https://openlibrary.org/search.json?q=${encodeURIComponent(rawQuery)}&limit=20`
+      `https://openlibrary.org/search.json?q=${encodeURIComponent(rawQuery)}&limit=20`,
     )
 
     const data = await res.json()
@@ -168,9 +149,7 @@ async function search() {
       id: d.key || d.cover_edition_key || d.title,
       title: d.title || 'Untitled',
       author: d.author_name?.[0] || 'Unknown',
-      cover: d.cover_i
-        ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg`
-        : '',
+      cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : '',
       price: Number((Math.random() * 25 + 5).toFixed(2)),
     }))
 
@@ -181,7 +160,7 @@ async function search() {
       JSON.stringify({
         timestamp: Date.now(),
         data: booksData,
-      })
+      }),
     )
   } finally {
     loading.value = false
@@ -200,7 +179,6 @@ const filteredBooks = computed(() => {
 })
 
 onMounted(() => search())
-
 </script>
 
 <style scoped>
