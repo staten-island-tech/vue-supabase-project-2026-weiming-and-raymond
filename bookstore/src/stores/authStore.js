@@ -4,27 +4,28 @@ import { supabase } from '../lib/supabase'
 export const useAuthStore = defineStore('auth', {
 
   actions: {
-
     async register(username, email, password) {
-
-      const { data, error } =
-        await supabase.auth.signUp({
-          email,
-          password
-        })
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      })
 
       if (error) throw error
 
-      await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: data.user.id,
-            username
-          }
-        ])
+      const authUser = data.user
 
-      return data
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert({
+          username,
+          email,
+          password,
+          created: new Date().toISOString(),
+        })
+
+      if (insertError) throw insertError
+
+      return authUser
     },
 
     async login(email, password) {
@@ -45,3 +46,4 @@ export const useAuthStore = defineStore('auth', {
     }
   }
 })
+
