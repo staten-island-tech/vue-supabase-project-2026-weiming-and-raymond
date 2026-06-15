@@ -32,6 +32,28 @@ export const useBookStore = defineStore('book', () => {
       if (data && data[0]) books.value.unshift(data[0])
       return data
     } catch (err) {
+      const msg = (err && (err.message || err.error || '')).toString().toLowerCase()
+      if (
+        msg.includes("could not find the 'cover' column") ||
+        msg.includes('could not find the "cover" column') ||
+        msg.includes('cover column')
+      ) {
+        try {
+          const trimmed = { ...payload }
+          delete trimmed.cover
+          const { data: data2, error: error2 } = await supabase
+            .from('books')
+            .insert(trimmed)
+            .select()
+          if (error2) throw error2
+          if (data2 && data2[0]) books.value.unshift(data2[0])
+          return data2
+        } catch (err2) {
+          console.error('addBook retry error', err2)
+          throw err2
+        }
+      }
+
       console.error('addBook error', err)
       throw err
     }

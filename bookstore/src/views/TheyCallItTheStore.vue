@@ -22,7 +22,7 @@
       <BookItem v-for="b in filteredBooks" :key="b.id" :book="b">
         <template #actions>
           <button class="btn" @click.prevent="saveToStore(b)" :disabled="saving">
-            {{ saving ? 'Saving…' : 'Save to store' }}
+            {{ saving ? 'Saving…' : 'Save to Books' }}
           </button>
         </template>
       </BookItem>
