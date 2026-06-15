@@ -2,48 +2,29 @@ import { defineStore } from 'pinia'
 import { supabase } from '../lib/supabase'
 
 export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    user: null,
-    initialized: false,
-  }),
 
   actions: {
-    async init() {
-      if (!supabase) return
-      if (this.initialized) return
-      this.initialized = true
-
-      try {
-        const { data } = await supabase.auth.getUser()
-        this.user = data?.user ?? null
-      } catch (err) {
-        console.warn('Failed to get supabase user during init', err)
-      }
-
-      try {
-        supabase.auth.onAuthStateChange((event, session) => {
-          this.user = session?.user ?? null
-        })
-      } catch (err) {
-        console.warn('Failed to subscribe to auth state changes', err)
-      }
-    },
 
     async register(username, email, password) {
+
       const { data, error } = await supabase.auth.signUp({ email, password })
 
       if (error) throw error
+
+      // If email confirmation is enabled in Supabase, `data.user` may be null
+      // until the user confirms their email. In that case, don't attempt to
+      // insert a profile row yet — return the data so the UI can instruct the
+      // user to check their email. If a user object is present, create the
+      // profile immediately.
       if (!data?.user) {
         return data
       }
 
-      this.user = data.user
-
       const { error: insertError } = await supabase.from('profiles').insert([
         {
           id: data.user.id,
-          username,
-        },
+          username
+        }
       ])
 
       if (insertError) throw insertError
@@ -52,23 +33,20 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async login(email, password) {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+
+      const { data, error } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password
+        })
 
       if (error) throw error
-
-      try {
-        const { data: userData } = await supabase.auth.getUser()
-        this.user = userData?.user ?? null
-      } catch (err) {
-        console.warn('Failed to refresh user after login', err)
-      }
 
       return data
     },
 
     async logout() {
       await supabase.auth.signOut()
-      this.user = null
-    },
-  },
+    }
+  }
 })
