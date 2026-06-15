@@ -26,7 +26,7 @@ import { RouterLink, RouterView } from 'vue-router'
   </div>
 </template>
 
-<style>
+<style scoped>
 :root {
   --bg: #f6f8fa;
   --card: #ffffff;
