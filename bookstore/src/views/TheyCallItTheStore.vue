@@ -17,15 +17,25 @@
     </header>
 
     <div v-if="loading" class="loading">Loading…</div>
+    <div class="cart-summary" v-if="cart.length">
+      <strong>Cart:</strong>
 
+      <span v-for="item in cart" :key="item.id"> {{ item.title }} ({{ item.quantity }}) </span>
+    </div>
     <div class="book-grid">
-      <BookItem v-for="b in filteredBooks" :key="b.id" :book="b">
-        <template #actions>
-          <button class="btn" @click.prevent="saveToStore(b)" :disabled="saving">
-            {{ saving ? 'Saving…' : 'Save to store' }}
-          </button>
-        </template>
-      </BookItem>
+      <article v-for="b in filteredBooks" :key="b.id" class="book-card">
+        <img v-if="b.cover" :src="b.cover" :alt="b.title" class="cover" />
+        <div class="meta">
+          <h3 class="title">{{ b.title }}</h3>
+          <p class="author">by {{ b.author }}</p>
+
+          <div class="actions">
+            <span class="price">${{ (b.price || 19.99).toFixed(2) }}</span>
+
+            <button class="buy-btn" @click="buyBook(b)">Buy Now</button>
+          </div>
+        </div>
+      </article>
     </div>
 
     <p v-if="!loading && filteredBooks.length === 0" class="empty">No books found.</p>
@@ -33,15 +43,15 @@
 </template>
 
 <script setup>
+import { useToast } from '@/components/composables/useToast.js'
 import { ref, onMounted, computed } from 'vue'
-import BookItem from '../components/BookItem.vue'
-import { useBookStore } from '../stores/bookStore'
-import { useAuthStore } from '../stores/authStore'
+import { supabase } from '@/lib/supabase'
 
 const query = ref('')
 const books = ref([])
 const loading = ref(false)
-
+const cart = ref([])
+const toast = useToast()
 const categories = ref(['All', 'Fiction', 'Nonfiction', 'Science', 'History', 'Mystery'])
 const category = ref('All')
 
@@ -50,38 +60,70 @@ function selectCategory(c) {
   if (c === 'All') search()
 }
 
-async function search() {
-  loading.value = true
-  books.value = []
-  const rawQuery = query.value.trim() || (category.value === 'All' ? 'fiction' : category.value)
-  const q = encodeURIComponent(rawQuery)
+function buyBook(book) {
+  const existing = cart.value.find((b) => b.id === book.id)
 
-  try {
-    const res = await fetch(`https://openlibrary.org/search.json?q=${q}&limit=20`)
-    if (!res.ok) {
-      const text = await res.text()
-      console.error('OpenLibrary responded with', res.status, text)
-      books.value = []
+  if (existing) {
+    existing.quantity++
+  } else {
+    cart.value.push({
+      ...book,
+      quantity: 1,
+      price: book.price || 19.99,
+    })
+  }
+
+  toast.success(`Added "${book.title}" to cart`)
+}
+
+const CACHE_DURATION = 1000 * 60 * 60
+
+async function search() {
+  const rawQuery = query.value.trim() || (category.value === 'All' ? 'fiction' : category.value)
+
+  const cacheKey = `books:${rawQuery}`
+
+  const cached = localStorage.getItem(cacheKey)
+
+  if (cached) {
+    const parsed = JSON.parse(cached)
+
+    if (Date.now() - parsed.timestamp < CACHE_DURATION) {
+      books.value = parsed.data
       return
     }
+  }
+
+  loading.value = true
+
+  try {
+    const res = await fetch(
+      `https://openlibrary.org/search.json?q=${encodeURIComponent(rawQuery)}&limit=20`,
+    )
+
     const data = await res.json()
-    console.log('OpenLibrary search result for', rawQuery, data)
-    const docs = data.docs || []
-    const parsed = docs.map((d) => ({
+
+    const booksData = (data.docs || []).map((d) => ({
       id: d.key || d.cover_edition_key || d.title,
       title: d.title || 'Untitled',
-      author: (d.author_name && d.author_name[0]) || 'Unknown',
+      author: d.author_name?.[0] || 'Unknown',
       cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : '',
+      price: Number((Math.random() * 25 + 5).toFixed(2)),
     }))
-    books.value = parsed
-  } catch (err) {
-    console.error('Failed to fetch books', err)
-    books.value = []
+
+    books.value = booksData
+
+    localStorage.setItem(
+      cacheKey,
+      JSON.stringify({
+        timestamp: Date.now(),
+        data: booksData,
+      }),
+    )
   } finally {
     loading.value = false
   }
 }
-
 const filteredBooks = computed(() => {
   if (!query.value && category.value === 'All') return books.value
   const q = query.value.trim().toLowerCase()
@@ -95,32 +137,6 @@ const filteredBooks = computed(() => {
 })
 
 onMounted(() => search())
-
-const bookStore = useBookStore()
-const auth = useAuthStore()
-const saving = ref(false)
-
-async function saveToStore(item) {
-  if (!item || !item.title) return
-  saving.value = true
-  try {
-    // ensure auth state initialized
-    auth.init()
-    const payload = {
-      title: item.title,
-      author: item.author || null,
-      cover: item.cover || null,
-      user_id: auth.user?.id || null,
-    }
-    await bookStore.addBook(payload)
-    alert('Saved to store')
-  } catch (err) {
-    console.error('saveToStore error', err)
-    alert('Failed to save: ' + (err.message || err))
-  } finally {
-    saving.value = false
-  }
-}
 </script>
 
 <style scoped>
@@ -208,5 +224,39 @@ async function saveToStore(item) {
     max-width: 1000px;
     margin: 0 auto 12px;
   }
+}
+.actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price {
+  font-weight: 600;
+}
+
+.buy-btn {
+  background: #16a34a;
+  color: white;
+  border: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.buy-btn:hover {
+  opacity: 0.9;
+}
+
+.cart-summary {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 12px;
+  margin-bottom: 16px;
+  background: #f8fafc;
+  border-radius: 10px;
 }
 </style>
